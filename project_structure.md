@@ -1,19 +1,22 @@
-# Feature Launch Kit
+---
+source: https://feature-launch-kit.atlassian.net/wiki/spaces/~701210308bc81ff5e457699ca2ddbb9602f32/pages/360449
+confluence_id: 360449
+---
 
 ### 1. Project identity
 
-- **Project name: **Feature Launch kit
-- **Primary project type:** Organizational 
-- **Defined goal (1 sentence): **To help the product team enable other departments supporting with necessary documentation and communication when a new product feature is launched.
-- **Start / end:** 24.07.26 (Day 1) morning → 28.07.26 (Day 3) presentation
+* **Project name:** Feature Launch kit
+* **Primary project type:** Organizational
+* **Defined goal (1 sentence):** To help the product team enable other departments supporting with necessary documentation and communication when a new product feature is launched.
+* **Start / end:** 24.07.26 (Day 1) morning → 28.07.26 (Day 3) presentation
 
 ### 2. Objectives (Quality / Time / Cost)
 
 | Constraint | **Internal Feature Launch Kit** |
 | --- | --- |
-| **Quality** | *Enables relevant teams of a new product feature release so that they have what they need for their go-to-market (GTM) activites.* - Sales - Customer Relations - Marketing |
-| **Time** | *Week 1 after feature release* |
-| **Cost** | *5 Euros of API token credit* |
+| **Quality** | _Enables relevant teams of a new product feature release so that they have what they need for their go-to-market (GTM) activities._ Sales, Customer Relations, Marketing |
+| **Time** | _Week 1 after feature release_ |
+| **Cost** | _5 Euros of API token credit_ |
 
 ### 3. Stakeholder analysis (quadrants I–IV)
 
@@ -29,7 +32,7 @@
 
 ### 4. Requirements → implementation
 
-**Use case:** As a product manager who has just released a feature, I need to share relevant information to Sales, Customer Relations and Marketing about the feature so that they can trigger relevant week 1 launch processes. 
+**Use case:** As a product manager who has just released a feature, I need to share relevant information to Sales, Customer Relations and Marketing about the feature so that they can trigger relevant week 1 launch processes.
 
 **Must have** (aim for ≤8):
 
@@ -38,15 +41,10 @@
 | M1 | Email template for the marketing team to send to customers about the new feature | `Repo Output folder` | Running the application generates a text email template document |
 | M2 | User guide for customer success team to have available for customers about the new feature | `Repo Output folder` | Running the application generates a user guide document |
 | M3 | One pager for the sales team about the core value messaging related to the new feature | `Repo Output folder` | Running the application generates a text one pager document |
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
 
-**Won’t have this sprint** (≥2):
+**Won't have this sprint** (≥2):
 
-| Won’t | Why deferred |
+| Won't | Why deferred |
 | --- | --- |
 | Different forms of input files (ppts/excel/.md) | Processing different inputs is a nice to have which can be defined in a later stage. |
 | RAG | To keep proof of concept strict in terms of input. Once we confirm output works off of strict input we could implement a more general RAG structure for all product features. |
@@ -61,7 +59,7 @@
    1.4 Create cards from this WBS
    1.5 Create repo
 2. Knowledge bases
-   2.1 Primary markdown set (feature information, marketing email template  example, feature user guide example, core value 1 pager template example)
+   2.1 Primary markdown set (feature information, marketing email template example, feature user guide example, core value 1 pager template example)
    2.2 Secondary markdown set (research reports, how-to guides, etc.)
 3. Project Outputs
    3.1 Marketing email (feature x)
@@ -93,4 +91,4 @@ Strategies: **Avoidance | Reduction | Mitigation | Transfer | Acceptance**
 
 ### 7. Bridge to `rag_decision.md`
 
-Initially we will be creating a proof on concept on a single feature to control for relevant output. Once we confirm that the feature launch kit works, we can then test it more broadly on different features. At this point, implementing an RAG on the product feature release database would be a useful next step so the AI solution can replicate and scale to all organization’s product development process.
+Initially we will be creating a proof of concept on a single feature to control for relevant output. Once we confirm that the feature launch kit works, we can then test it more broadly on different features. At this point, implementing an RAG on the product feature release database would be a useful next step so the AI solution can replicate and scale to all organization's product development process.
