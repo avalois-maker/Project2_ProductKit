@@ -18,7 +18,7 @@ knowledge_base/primary/
   company_overview.md                      company/product facts
 knowledge_base/secondary/
   launch_comms_best_practices.md           condensed external reference
-prompts/
+templates/
   launch_communication_cascade.md          -> M1
   sales_enablement_kit.md                  -> M3
   rollout_strategy_planner.md              supporting
