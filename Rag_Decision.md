@@ -1,0 +1,2 @@
+Initially we will be creating a proof on concept on a single feature to control for relevant output. Once we confirm that the feature launch kit works, we can then test it more broadly on different features. At this point, implementing an RAG on the product feature release database would be a useful next step so the AI solution can replicate and scale to all organization’s product development process.
+For the MVP, we will have a library where the agent can gather inputs in needs for context and it will use those to generate outputs.
