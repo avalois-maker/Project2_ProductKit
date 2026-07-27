@@ -130,7 +130,7 @@ _SCOPE_GENERATORS["all"] = (
 )
 
 
-CURRENT_RELEASE = "Smart Home Configurator — Frontend Usability Improvements"
+CURRENT_RELEASE = "Smart Home Configurator - Release v2.0.11"
 
 
 def list_releases() -> list[str]:
