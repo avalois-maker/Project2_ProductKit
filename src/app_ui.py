@@ -198,7 +198,6 @@ def _status_html(text: str, done: bool, progress: int) -> str:
         '<div class="lk-card" style="padding:32px 28px;">'
         f'<div class="lk-status-row">{icon}<span>{_escape(text)}</span></div>'
         f'<div class="lk-progress-track"><div class="lk-progress-fill" style="width:{progress}%;"></div></div>'
-        f'<div style="font-size:12px;color:var(--lk-muted);margin-top:8px;font-family:monospace;">{progress}% complete</div>'
         '</div>'
     )
 
