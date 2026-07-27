@@ -25,21 +25,21 @@ _escape = html.escape
 SRC_DIR = Path(__file__).parent
 REPO_ROOT = SRC_DIR.parent
 QMD_TEMPLATE = SRC_DIR / "render_template.qmd"
-LOGO_PATH = REPO_ROOT / "logo_smartivate.svg"
+LOGO_PATH = REPO_ROOT / "assets" / "logo_smartivate.png"
 
 SCOPE_LABELS = {
     "all": "Complete kit",
-    "marketing": "Marketing (Email)",
-    "customer_success": "Customer Success (Guide)",
-    "sales": "Sales (One-pager)",
+    "marketing": "Marketing kit",
+    "customer_success": "Customer Success kit",
+    "sales": "Sales kit",
 }
 SCOPE_CHOICES = list(SCOPE_LABELS.values())
 SCOPE_BY_LABEL = {v: k for k, v in SCOPE_LABELS.items()}
 
 SECTION_LABELS = {
-    "email": "Email — Marketing",
-    "guide": "Guide — Customer Success",
-    "onepager": "One-pager — Sales",
+    "email": "MARKETING KIT",
+    "guide": "CUSTOMER SUCCESS KIT",
+    "onepager": "SALES KIT",
 }
 
 SCREENS = ["select", "generating", "review", "download"]
@@ -110,7 +110,6 @@ body, .gradio-container {
 #lk-header .lk-brand .lk-logo {
     height: 32px; width: auto; display: inline-block;
 }
-#lk-header .lk-brand-name { font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--lk-muted); }
 #lk-header .lk-app-name { font-weight: 500; color: var(--lk-fg); }
 #lk-header .lk-steps { display: flex; gap: 6px; align-items: center; }
 #lk-header .lk-steps span { height: 6px; border-radius: 3px; background: var(--lk-border); display: inline-block; }
@@ -139,9 +138,14 @@ body, .gradio-container {
 }
 .lk-status-row { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 500; color: var(--lk-fg); }
 .lk-spinner {
-    width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
-    border: 2px solid var(--lk-border); border-top-color: var(--lk-primary);
-    animation: lk-spin 0.9s linear infinite;
+    box-sizing: border-box !important;
+    display: inline-block !important;
+    width: 20px !important; height: 20px !important;
+    border-radius: 50% !important; flex-shrink: 0;
+    border: 3px solid #DDDDE8 !important;
+    border-top: 3px solid #2F2FEB !important;
+    border-top-color: #2F2FEB !important;
+    animation: lk-spin 0.9s linear infinite !important;
 }
 .lk-check {
     width: 20px; height: 20px; border-radius: 50%; background: var(--lk-success);
@@ -181,8 +185,7 @@ def _step_dots_html(active: str) -> str:
     return (
         '<div id="lk-header">'
         f'<div class="lk-brand"><img src="/gradio_api/file={LOGO_PATH}" alt="Smartivate" class="lk-logo">'
-        '<span class="lk-brand-name">Smartivate</span>'
-        '<span style="color:var(--lk-border);">·</span>'
+        '<span style="color:var(--lk-border);">|</span>'
         '<span class="lk-app-name">Feature Launch Kit</span></div>'
         f'<div class="lk-steps">{"".join(dots)}</div>'
         '</div>'
@@ -480,4 +483,8 @@ with gr.Blocks(title="Feature Launch Kit") as demo:
 
 
 if __name__ == "__main__":
-    demo.launch(css=THEME_CSS, theme=LK_THEME, allowed_paths=[str(LOGO_PATH)])
+    demo.launch(
+        css=THEME_CSS,
+        theme=LK_THEME,
+        allowed_paths=[str(LOGO_PATH)],
+    )
