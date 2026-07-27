@@ -487,4 +487,5 @@ if __name__ == "__main__":
         css=THEME_CSS,
         theme=LK_THEME,
         allowed_paths=[str(LOGO_PATH)],
+        inbrowser=True,
     )
