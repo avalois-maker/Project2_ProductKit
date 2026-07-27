@@ -5,3 +5,4 @@ nbformat
 nbclient
 openai
 cohere
+pytest
