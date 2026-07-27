@@ -1,12 +1,11 @@
 """
 content_pipeline.py — end-to-end generation pipeline (WBS 5.3).
 
-Loads knowledge-base context, runs a prompt template through the LLM client,
-and writes the result to output/. Each Must gets one generate_* function
-following the same pattern.
+Loads knowledge-base context + a markdown prompt spec, runs it through the LLM
+client, and writes each output to output/.
 
-Implemented: M3 (sales one-pager).
-Run:  python -m src.content_pipeline    (from repo root)
+Implemented: M1 (marketing kit), M2 (user guide), M3 (sales one-pager).
+Run:  python -m src.content_pipeline      (from repo root)
 """
 
 from __future__ import annotations
@@ -14,18 +13,44 @@ from __future__ import annotations
 from pathlib import Path
 
 from src.llm_integration import LLMClient
-from src.prompt_templates import build_sales_one_pager_prompt
+from src.prompt_templates import build_prompt_from_spec
 
-# --- Paths (relative to repo root; run from there) ---
+# ---------------------------------------------------------------------------
+# PATHS — adjust these if your folder names differ. This is the only section
+# you should need to touch.
+# ---------------------------------------------------------------------------
 KB = Path("knowledge_base")
-PRIMARY = KB / "primary"
-SECONDARY = KB / "secondary"
+PRODUCT = KB / "product"        # PRD / release docs
+PRIMARY = KB / "primary"        # company / brand / product info
+SECONDARY = KB / "secondary"    # communication / tone / best practices
+
+TEMPLATES = Path("templates")   # prompt spec .md files live here
 OUTPUT_DIR = Path("output")
 
+# Map each output to (spec file, output filename, Must ID)
+SPEC_MARKETING = TEMPLATES / "marketing.md"
+SPEC_USER_GUIDE = TEMPLATES / "customer_guide.md"
+SPEC_SALES = TEMPLATES / "sales_onepager.md"
 
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
 def _read(path: Path) -> str:
-    """Read a knowledge-base markdown file as UTF-8."""
+    """Read a single file as UTF-8."""
     return path.read_text(encoding="utf-8")
+
+
+def _load_folder(folder: Path) -> str:
+    """
+    Concatenate every top-level .md file in a folder (sorted, labeled).
+    Non-recursive on purpose: skips subfolders (e.g. past_content/) and
+    non-markdown files (e.g. PDFs). Returns '' if the folder is missing.
+    """
+    if not folder.is_dir():
+        return ""
+    files = sorted(folder.glob("*.md"))
+    return "\n\n".join(f"## {f.name}\n{_read(f)}" for f in files)
 
 
 def _write_output(filename: str, text: str) -> Path:
@@ -36,36 +61,47 @@ def _write_output(filename: str, text: str) -> Path:
     return out_path
 
 
-def generate_sales_one_pager(client: LLMClient | None = None) -> Path:
-    """Generate the sales one-pager (Must M3) and write it to output/."""
-    client = client or LLMClient()
-
-    system, user = build_sales_one_pager_prompt(
-        feature_context=_read(PRIMARY / "feature_brief.md"),
-        brand_context=_read(PRIMARY / "brand_voice.md"),
-        research_context=_read(SECONDARY / "sales_enablement_kit.md"),
+def _generate(spec_path: Path, out_filename: str, tag: str, client: LLMClient) -> Path:
+    """Shared generation routine: load spec + KB, call LLM, write output."""
+    system, user = build_prompt_from_spec(
+        spec=_read(spec_path),
+        product_context=_load_folder(PRODUCT),
+        primary_context=_load_folder(PRIMARY),
+        secondary_context=_load_folder(SECONDARY),
     )
-
     result = client.generate(system, user)
-    out_path = _write_output("sales_one_pager.txt", result.text)
-    print(f"[M3] sales one-pager -> {out_path}  (via {result.provider} / {result.model})")
+    out_path = _write_output(out_filename, result.text)
+    print(f"[{tag}] {out_filename} -> {out_path}  (via {result.provider} / {result.model})")
     return out_path
 
 
-# --- Extension point for teammates (templates M1/M2 not written yet) ---
-# def generate_marketing_email(client=None) -> Path:   # M1
-#     system, user = build_marketing_email_prompt(...)
-#     return _write_output("marketing_email.txt", client.generate(system, user).text)
-#
-# def generate_user_guide(client=None) -> Path:        # M2
-#     system, user = build_user_guide_prompt(...)
-#     return _write_output("user_guide.txt", client.generate(system, user).text)
+# ---------------------------------------------------------------------------
+# One generator per Must
+# ---------------------------------------------------------------------------
+def generate_marketing_kit(client: LLMClient | None = None) -> Path:
+    """Marketing promotion kit (Must M1)."""
+    return _generate(SPEC_MARKETING, "marketing_kit.txt", "M1", client or LLMClient())
 
 
+def generate_user_guide(client: LLMClient | None = None) -> Path:
+    """Customer user guide (Must M2)."""
+    return _generate(SPEC_USER_GUIDE, "user_guide.txt", "M2", client or LLMClient())
+
+
+def generate_sales_one_pager(client: LLMClient | None = None) -> Path:
+    """Sales one-pager (Must M3)."""
+    return _generate(SPEC_SALES, "sales_one_pager.txt", "M3", client or LLMClient())
+
+
+# ---------------------------------------------------------------------------
+# Entry point
+# ---------------------------------------------------------------------------
 def main() -> None:
-    """Run all implemented generators, reusing one client across outputs."""
-    client = LLMClient()
+    """Run all three generators, reusing one client across outputs."""
+    client = LLMClient()  # one client, shared → cheaper for the €5 budget
     generate_sales_one_pager(client)
+    generate_marketing_kit(client)
+    generate_user_guide(client)
 
 
 if __name__ == "__main__":

@@ -53,8 +53,8 @@ class LLMClient:
         self.temperature = temperature
         self.max_tokens = max_tokens
 
-        # Models are configurable via .env so we can swap cheap<->quality
-        # without touching code. Defaults kept budget-friendly (€5 cap).
+        # Models configurable via .env so we can swap cheap<->quality without
+        # touching code. Defaults kept budget-friendly (€5 cap).
         self.models = {
             "openai": os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
             "cohere": os.getenv("COHERE_MODEL", "command-r-plus-08-2024"),
@@ -116,7 +116,7 @@ class LLMClient:
 
 
 if __name__ == "__main__":
-    # Smoke test — run: python src/llm_integration.py
+    # Smoke test — run: python -m src.llm_integration
     client = LLMClient()
     result = client.generate(
         system="You are a concise assistant.",
