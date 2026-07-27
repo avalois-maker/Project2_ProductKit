@@ -7,6 +7,7 @@ the stub in that module for the real pipeline requires no changes here.
 
 import html
 import json
+import logging
 import os
 import subprocess
 import tempfile
@@ -16,7 +17,9 @@ from pathlib import Path
 import gradio as gr
 
 from content_pipeline import generate_kit, list_releases
+from llm_integration import LLMError
 
+logger = logging.getLogger(__name__)
 _escape = html.escape
 
 SRC_DIR = Path(__file__).parent
@@ -231,10 +234,13 @@ def _render_quarto(release: str, scope_label: str, content: dict) -> str:
     local_out = QMD_TEMPLATE.with_suffix(".html")
     env = dict(os.environ, KIT_RENDER_DATA=str(data_path))
     try:
-        subprocess.run(
+        result = subprocess.run(
             ["quarto", "render", str(QMD_TEMPLATE), "--to", "html"],
-            env=env, check=True, capture_output=True, cwd=SRC_DIR,
+            env=env, capture_output=True, cwd=SRC_DIR, text=True,
         )
+        if result.returncode != 0:
+            logger.error("Quarto render failed (exit %s): %s", result.returncode, result.stderr)
+            raise gr.Error("Couldn't build the download document. Please try Pass again.")
         tmp_dir = Path(tempfile.mkdtemp(prefix="launch_kit_"))
         out_path = tmp_dir / "launch_kit.html"
         out_path.write_bytes(local_out.read_bytes())
@@ -311,7 +317,11 @@ with gr.Blocks(title="Feature Launch Kit") as demo:
 
     def on_generate_run(release, scope_label):
         time.sleep(0.6)
-        content = generate_kit(release, SCOPE_BY_LABEL[scope_label])
+        try:
+            content = generate_kit(release, SCOPE_BY_LABEL[scope_label])
+        except LLMError:
+            logger.exception("generate_kit failed (all LLM providers down)")
+            raise gr.Error("Generation failed — both LLM providers are unavailable. Try again shortly.")
         return _status_html("Done", True, 100), content
 
     def on_generate_finish(release, scope_label, content):
@@ -367,7 +377,11 @@ with gr.Blocks(title="Feature Launch Kit") as demo:
         time.sleep(0.5)
         # Higher temperature than the first pass so a regenerate reads
         # differently instead of nearly repeating the same phrasing.
-        content = generate_kit(release, SCOPE_BY_LABEL[scope_label], temperature=1.0)
+        try:
+            content = generate_kit(release, SCOPE_BY_LABEL[scope_label], temperature=1.0)
+        except LLMError:
+            logger.exception("generate_kit (regenerate) failed (all LLM providers down)")
+            raise gr.Error("Regeneration failed — both LLM providers are unavailable. Try again shortly.")
         return _status_html("Done", True, 100), content
 
     def on_fail_finish(content):
