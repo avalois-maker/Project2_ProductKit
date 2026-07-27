@@ -28,7 +28,7 @@ TEMPLATES = Path("templates")   # prompt spec .md files live here
 OUTPUT_DIR = Path("output")
 
 # Map each output to (spec file, output filename, Must ID)
-SPEC_MARKETING = TEMPLATES / "marketing.md"
+SPEC_MARKETING = TEMPLATES / "marketing_email.md"
 SPEC_USER_GUIDE = TEMPLATES / "customer_guide.md"
 SPEC_SALES = TEMPLATES / "sales_onepager.md"
 
