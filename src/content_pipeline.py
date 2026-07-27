@@ -12,20 +12,25 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from src.llm_integration import LLMClient
-from src.prompt_templates import build_prompt_from_spec
+try:
+    from src.llm_integration import LLMClient
+    from src.prompt_templates import build_prompt_from_spec
+except ImportError:  # running as a sibling module (e.g. `from content_pipeline import ...`)
+    from llm_integration import LLMClient
+    from prompt_templates import build_prompt_from_spec
 
 # ---------------------------------------------------------------------------
 # PATHS — adjust these if your folder names differ. This is the only section
 # you should need to touch.
 # ---------------------------------------------------------------------------
-KB = Path("knowledge_base")
+REPO_ROOT = Path(__file__).resolve().parent.parent
+KB = REPO_ROOT / "knowledge_base"
 PRODUCT = KB / "product"        # PRD / release docs
 PRIMARY = KB / "primary"        # company / brand / product info
 SECONDARY = KB / "secondary"    # communication / tone / best practices
 
-TEMPLATES = Path("templates")   # prompt spec .md files live here
-OUTPUT_DIR = Path("output")
+TEMPLATES = REPO_ROOT / "templates"   # prompt spec .md files live here
+OUTPUT_DIR = REPO_ROOT / "output"
 
 # Map each output to (spec file, output filename, Must ID)
 SPEC_MARKETING = TEMPLATES / "marketing_email.md"
@@ -106,3 +111,65 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+# ---------------------------------------------------------------------------
+# Frontend seam — used by src/app_ui.py (Gradio UI).
+# ---------------------------------------------------------------------------
+SCOPES = ("all", "marketing", "customer_success", "sales")
+
+_SCOPE_GENERATORS = {
+    "marketing": [("email", generate_marketing_kit)],
+    "customer_success": [("guide", generate_user_guide)],
+    "sales": [("onepager", generate_sales_one_pager)],
+}
+_SCOPE_GENERATORS["all"] = (
+    _SCOPE_GENERATORS["marketing"]
+    + _SCOPE_GENERATORS["customer_success"]
+    + _SCOPE_GENERATORS["sales"]
+)
+
+
+CURRENT_RELEASE = "Smart Home Configurator — Frontend Usability Improvements"
+
+
+def list_releases() -> list[str]:
+    """Releases available to generate a kit for.
+
+    The pipeline reads the whole knowledge_base/product/ folder as one
+    feature's context (PRD, release notes, feature brief all describe the
+    same release), per project_structure.md's single-feature POC scope — so
+    this returns one label rather than one entry per file in that folder.
+    """
+    if not PRODUCT.is_dir() or not any(PRODUCT.glob("*.md")):
+        return []
+    return [CURRENT_RELEASE]
+
+
+def generate_kit(feature_file: str, scope: str, temperature: float = 0.7) -> dict[str, str]:
+    """Generate launch kit content for the current feature release.
+
+    feature_file is accepted for forward-compatibility with a future
+    multi-release KB, but today's pipeline reads the whole product/ folder
+    per project_structure.md's single-feature POC scope, so it's unused for
+    now beyond validating the caller's selection is one of list_releases().
+
+    Args:
+        feature_file: stem of a file in knowledge_base/product/ (see list_releases()).
+        scope: one of SCOPES — "all", "marketing", "customer_success", "sales".
+        temperature: LLM sampling temperature. Raise it for a "Regenerate" pass
+            so a re-roll actually reads differently instead of nearly repeating.
+
+    Returns:
+        dict with a subset of keys {"email", "guide", "onepager"} depending on scope,
+        each holding the generated text (read back from the file the backend wrote).
+    """
+    if scope not in SCOPES:
+        raise ValueError(f"scope must be one of {SCOPES}, got {scope!r}")
+
+    client = LLMClient(temperature=temperature)  # one client, shared across calls this run
+    result = {}
+    for key, generator in _SCOPE_GENERATORS[scope]:
+        out_path = generator(client)
+        result[key] = out_path.read_text(encoding="utf-8")
+    return result

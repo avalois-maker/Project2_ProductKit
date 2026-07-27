@@ -1,0 +1,29 @@
+---
+title: "Feature Launch Kit"
+format:
+  html:
+    embed-resources: true
+    theme: cosmo
+    css: quarto_style.css
+    toc: false
+jupyter: python3
+---
+
+```{python}
+#| echo: false
+#| output: asis
+import json
+import os
+
+data_path = os.environ["KIT_RENDER_DATA"]
+with open(data_path, encoding="utf-8") as f:
+    payload = json.load(f)
+
+print(f"# {payload['subtitle']}\n")
+print(f"*{payload['release']}*\n")
+
+for section in payload["sections"]:
+    print(f"## {section['label']}\n")
+    body = section["body"].replace("\n", "  \n")
+    print(f"{body}\n")
+```

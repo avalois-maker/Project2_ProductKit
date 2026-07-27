@@ -1,0 +1,7 @@
+gradio
+python-dotenv
+jupyter
+nbformat
+nbclient
+openai
+cohere
