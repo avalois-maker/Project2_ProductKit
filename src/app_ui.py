@@ -9,6 +9,7 @@ import html
 import json
 import logging
 import os
+import re
 import subprocess
 import tempfile
 import time
@@ -216,8 +217,31 @@ def _box_updates(content: dict) -> list:
     return updates
 
 
-def _render_quarto(release: str, scope_label: str, content: dict) -> str:
-    """Render the approved content to a styled HTML doc via Quarto. Returns the output file path.
+def _clean_llm_body(body: str) -> str:
+    """Strip LLM quirks that would otherwise render badly: a wrapping fenced
+    code block, and a leading H1 that just repeats the section label above it.
+    Mirrored in render_template.qmd's Python block, which does the same
+    cleanup for the HTML render — kept in sync manually since one runs inside
+    Quarto's own execution and can't import from here."""
+    body = body.strip()
+    body = re.sub(r"^```[a-zA-Z]*\n(.*)\n```$", r"\1", body, flags=re.DOTALL).strip()
+    body = re.sub(r"^#\s+.+?\n+", "", body, count=1)
+    return body
+
+
+def _build_markdown(release: str, content: dict) -> str:
+    """Plain .md version of the approved kit: same structure as the Quarto
+    render (release title, one section per kit), no styling applied."""
+    parts = [f"# {release}\n"]
+    for key, body in content.items():
+        label = SECTION_LABELS.get(key, key)
+        parts.append(f"## {label}\n\n{_clean_llm_body(body)}\n")
+    return "\n".join(parts)
+
+
+def _render_quarto(release: str, scope_label: str, content: dict) -> list[str]:
+    """Render the approved content to a styled HTML doc via Quarto, plus a
+    plain .md file. Returns both output file paths.
 
     Quarto's --output-dir doesn't relocate embedded resource lookups correctly for
     this template, so we render next to render_template.qmd (its natural working
@@ -244,12 +268,16 @@ def _render_quarto(release: str, scope_label: str, content: dict) -> str:
             logger.error("Quarto render failed (exit %s): %s", result.returncode, result.stderr)
             raise gr.Error("Couldn't build the download document. Please try Pass again.")
         tmp_dir = Path(tempfile.mkdtemp(prefix="launch_kit_"))
-        out_path = tmp_dir / "launch_kit.html"
-        out_path.write_bytes(local_out.read_bytes())
+        html_path = tmp_dir / "launch_kit.html"
+        html_path.write_bytes(local_out.read_bytes())
     finally:
         data_path.unlink(missing_ok=True)
         local_out.unlink(missing_ok=True)
-    return str(out_path)
+
+    md_path = tmp_dir / "launch_kit.md"
+    md_path.write_text(_build_markdown(release, content), encoding="utf-8")
+
+    return [str(html_path), str(md_path)]
 
 
 with gr.Blocks(title="Feature Launch Kit") as demo:
@@ -298,11 +326,32 @@ with gr.Blocks(title="Feature Launch Kit") as demo:
         with gr.Column(visible=False) as download_screen:
             gr.HTML('<div class="lk-page-title">Feature Launch Kit</div>')
             download_status = gr.HTML("")
-            download_file = gr.File(label="Download", interactive=False)
+            download_file = gr.File(label="Download", interactive=False, file_count="multiple")
             start_over_btn = gr.Button("Start over", variant="secondary", elem_id="lk-start-over-btn")
 
     # ── Wiring ───────────────────────────────────────────────────────────
 
+    def _review_sub_html(content: dict) -> str:
+        return (
+            f'<div class="lk-page-sub">{len(content)} output(s) generated. '
+            'Edit the text below if needed, then Pass to package it for download.</div>'
+        )
+
+    def _generate_or_raise(release: str, scope_label: str, temperature: float, retry_msg: str) -> dict:
+        """Call the pipeline, turning an all-providers-down failure into a
+        clean UI error instead of a raw traceback."""
+        try:
+            return generate_kit(release, SCOPE_BY_LABEL[scope_label], temperature=temperature)
+        except LLMError:
+            logger.exception("generate_kit failed (all LLM providers down)")
+            raise gr.Error(retry_msg)
+
+    _box_outputs = [comp for pair in output_boxes.values() for comp in pair]
+
+    # Generate (first pass, from Select) and Fail/Regenerate (from Review) run
+    # the same three-stage pipeline (loading -> generating -> done) and land
+    # on the same Review screen; they only differ in where they start from,
+    # the loading copy, and the temperature used for the LLM call.
     def on_generate_start(release):
         if not release:
             raise gr.Error("Select a release first.")
@@ -319,11 +368,10 @@ with gr.Blocks(title="Feature Launch Kit") as demo:
 
     def on_generate_run(release, scope_label):
         time.sleep(0.6)
-        try:
-            content = generate_kit(release, SCOPE_BY_LABEL[scope_label])
-        except LLMError:
-            logger.exception("generate_kit failed (all LLM providers down)")
-            raise gr.Error("Generation failed — both LLM providers are unavailable. Try again shortly.")
+        content = _generate_or_raise(
+            release, scope_label, temperature=0.7,
+            retry_msg="Generation failed — both LLM providers are unavailable. Try again shortly.",
+        )
         return _status_html("Done", True, 100), content
 
     def on_generate_finish(release, scope_label, content):
@@ -332,14 +380,11 @@ with gr.Blocks(title="Feature Launch Kit") as demo:
             gr.update(visible=False),   # generating_screen
             gr.update(visible=True),    # review_screen
             _step_dots_html("review"),  # header_html
-            f'<div class="lk-page-sub">{len(content)} output(s) generated. '
-            'Edit the text below if needed, then Pass to package it for download.</div>',
+            _review_sub_html(content),
             *_box_updates(content),
             release,
             scope_label,
         )
-
-    _box_outputs = [comp for pair in output_boxes.values() for comp in pair]
 
     generate_btn.click(
         on_generate_start,
@@ -371,19 +416,14 @@ with gr.Blocks(title="Feature Launch Kit") as demo:
             _status_html("Regenerating...", False, 20),
         )
 
-    def on_fail_progress():
-        time.sleep(0.6)
-        return _status_html("Generating content...", False, 65)
-
     def on_fail_run(release, scope_label):
         time.sleep(0.5)
         # Higher temperature than the first pass so a regenerate reads
         # differently instead of nearly repeating the same phrasing.
-        try:
-            content = generate_kit(release, SCOPE_BY_LABEL[scope_label], temperature=1.0)
-        except LLMError:
-            logger.exception("generate_kit (regenerate) failed (all LLM providers down)")
-            raise gr.Error("Regeneration failed — both LLM providers are unavailable. Try again shortly.")
+        content = _generate_or_raise(
+            release, scope_label, temperature=1.0,
+            retry_msg="Regeneration failed — both LLM providers are unavailable. Try again shortly.",
+        )
         return _status_html("Done", True, 100), content
 
     def on_fail_finish(content):
@@ -392,8 +432,7 @@ with gr.Blocks(title="Feature Launch Kit") as demo:
             gr.update(visible=False),   # generating_screen
             gr.update(visible=True),    # review_screen
             _step_dots_html("review"),
-            f'<div class="lk-page-sub">{len(content)} output(s) generated. '
-            'Edit the text below if needed, then Pass to package it for download.</div>',
+            _review_sub_html(content),
             *_box_updates(content),
         )
 
@@ -402,7 +441,7 @@ with gr.Blocks(title="Feature Launch Kit") as demo:
         outputs=[review_screen, generating_screen, header_html, status_html],
         show_progress="hidden",
     ).then(
-        on_fail_progress,
+        on_generate_progress,
         outputs=[status_html],
         show_progress="hidden",
     ).then(
@@ -433,10 +472,10 @@ with gr.Blocks(title="Feature Launch Kit") as demo:
             for i, key in enumerate(SECTION_LABELS)
             if key in original_content
         }
-        out_path = _render_quarto(release, scope_label, edited_content)
-        return _status_html("Done", True, 100), out_path
+        out_paths = _render_quarto(release, scope_label, edited_content)
+        return _status_html("Done", True, 100), out_paths
 
-    def on_pass_finish(release, scope_label, out_path):
+    def on_pass_finish(release, scope_label, out_paths):
         time.sleep(0.4)
         return (
             gr.update(visible=False),     # generating_screen
@@ -447,7 +486,7 @@ with gr.Blocks(title="Feature Launch Kit") as demo:
              '<div style="font-size:18px;font-weight:700;margin-bottom:6px;">Your launch kit is ready</div>'
              f'<div style="font-size:13px;color:var(--lk-muted);">{_escape(scope_label)} · {_escape(release)}</div>'
              '</div>'),
-            out_path,
+            out_paths,
         )
 
     pass_btn.click(

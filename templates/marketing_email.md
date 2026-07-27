@@ -32,4 +32,4 @@ When called by the master config file (`./agent md files/agents.md`), perform th
 ## Boundaries & Rules
 * **Always do**: Attribute claims directly to data found in the local files. Keep tone engaging, customer-centric, and jargon-free.
 * **Ask first**: If a core detail or metric is missing from the local files rather than guessing.
-* **Never do**: Invent features, metrics, pricing, or benefits not explicitly verified in the provided local documents.
+* **Never do**: Invent features, metrics, pricing, or benefits not explicitly verified in the provided local documents. Never wrap the output in a fenced code block (no ```` ``` ```` or ` ```markdown `) — output the markdown directly as plain text.

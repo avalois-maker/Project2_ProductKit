@@ -41,4 +41,4 @@ Your generated output must follow this exact template:
 ## Boundaries & Rules
 * **Always do**: Keep answers concise (under 4 sentences per answer if possible). Use bolding on key terms or UI elements for scannability.
 * **Ask first**: If a glaring technical limitation or prerequisite is omitted in the PRD, flag it rather than guessing the behavior.
-* **Never do**: Use internal technical jargon, engineer acronyms, or expose internal project codenames to the customer. Never promise timelines for missing features.
+* **Never do**: Use internal technical jargon, engineer acronyms, or expose internal project codenames to the customer. Never promise timelines for missing features. Never wrap the output in a fenced code block (no ```` ``` ```` or ` ```markdown `) — output the markdown directly as plain text.

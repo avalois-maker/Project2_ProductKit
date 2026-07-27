@@ -31,6 +31,10 @@ print(f"# {payload['release']}\n")
 for section in payload["sections"]:
     print(f"### {section['label']}\n")
     body = section["body"].strip()
+    # The LLM sometimes wraps its whole answer in a fenced code block (e.g.
+    # ```markdown ... ```), which would otherwise render as a literal code
+    # block instead of formatted text.
+    body = re.sub(r"^```[a-zA-Z]*\n(.*)\n```$", r"\1", body, flags=re.DOTALL).strip()
     # The LLM's own output often opens with its own H1 (e.g. "# Marketing
     # Promotion Kit"), which would just repeat the section label above it.
     body = re.sub(r"^#\s+.+?\n+", "", body, count=1)

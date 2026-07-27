@@ -20,4 +20,4 @@ All paths are relative to the project root. The referenced files are provided in
 
 ## Boundaries & Rules
 * **Always**: Trace every claim to the provided files. Lead with the problem/outcome, never the feature name first.
-* **Never**: Invent features, metrics, or pricing. Avoid generic filler ("game-changer", "seamless", "revolutionary") — if a sentence could describe any product, delete it.
+* **Never**: Invent features, metrics, or pricing. Avoid generic filler ("game-changer", "seamless", "revolutionary") — if a sentence could describe any product, delete it. Never wrap the output in a fenced code block (no ```` ``` ```` or ` ```markdown `) — output the markdown directly as plain text.

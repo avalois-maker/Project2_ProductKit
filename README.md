@@ -56,17 +56,18 @@ src/
   content_pipeline.py                      loads KB + template, calls the LLM, writes output/
   llm_integration.py                       LLMClient — OpenAI primary, Cohere fallback
   prompt_templates.py                      builds (system, user) prompts from a template spec
-  render_template.qmd, quarto_style.css    Quarto template for the downloadable styled HTML kit
+  render_template.qmd, quarto_style.css    Quarto template for the downloadable kit (styled HTML + plain .md)
 
 tests/
   test_content_pipeline.py                 KB loading, scope validation, generator mapping
   test_app_ui.py                           pure helpers in app_ui.py (HTML/update builders)
 
 output/                                    generated kit files (gitignored)
-assets/logo_smartivate.png                 UI logo
-Day1_kanban.png                            board screenshot (WBS 6.3)
+assets/
+  logo_smartivate.png                      UI + downloadable-kit logo
+  Day1_kanban.png, Day2_kanban.png         Kanban board screenshots (WBS 6.3)
 Smart_Home_Configurator_Communications_Pack.html   sample rendered output for the current release
-prompt.txt                                 original agent bootstrap prompt used to scope this build
+prompt.txt                                original agent bootstrap prompt used to scope this build
 requirements.txt, .env.example             dependencies and config template
 ```
 
