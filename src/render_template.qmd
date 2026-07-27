@@ -3,7 +3,7 @@ title: ""
 format:
   html:
     embed-resources: true
-    theme: cosmo
+    minimal: true
     css: quarto_style.css
     toc: false
 jupyter: python3
