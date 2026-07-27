@@ -22,8 +22,12 @@ When called by the master config file (`./agent md files/agents.md`), perform th
 5. **Draft Kit**: Produce a unified markdown output containing:
    - **Elevator Pitch** (30-second summary)
    - **Core Value Propositions** (3 bullet points tailored to the customer)
-   - **Social Media Copy** (2 variations for LinkedIn/X matching the brand voice)
+   - **Social Media Copy** (one short intro line, then 2 variations for LinkedIn/X matching the brand voice — never leave this section as a bare heading with no text of its own before the variations)
    - **Email Announcement Draft** (Subject line + short body)
+
+   Every top-level section above must contain at least one line of its own
+   content directly underneath the heading — do not use a heading purely as
+   a label for nested sub-headings with nothing written under it.
 
 ## Boundaries & Rules
 * **Always do**: Attribute claims directly to data found in the local files. Keep tone engaging, customer-centric, and jargon-free.
