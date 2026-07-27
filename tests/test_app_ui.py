@@ -45,7 +45,7 @@ class TestStatusHtml:
 
         assert "lk-spinner" in html
         assert "lk-check" not in html
-        assert "40% complete" in html
+        assert "width:40%;" in html
 
     def test_shows_checkmark_when_done(self):
         html = app_ui._status_html("Done", True, 100)
