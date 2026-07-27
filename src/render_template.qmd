@@ -1,5 +1,5 @@
 ---
-title: "Feature Launch Kit"
+title: ""
 format:
   html:
     embed-resources: true
@@ -9,21 +9,34 @@ format:
 jupyter: python3
 ---
 
+```{=html}
+<div class="brand-header">
+  <img src="../assets/logo_smartivate.png" alt="Smartivate">
+</div>
+```
+
 ```{python}
 #| echo: false
 #| output: asis
 import json
 import os
+import re
 
 data_path = os.environ["KIT_RENDER_DATA"]
 with open(data_path, encoding="utf-8") as f:
     payload = json.load(f)
 
-print(f"# {payload['subtitle']}\n")
-print(f"*{payload['release']}*\n")
+print(f"# {payload['release']}\n")
 
 for section in payload["sections"]:
-    print(f"## {section['label']}\n")
-    body = section["body"].replace("\n", "  \n")
+    print(f"### {section['label']}\n")
+    body = section["body"].strip()
+    # The LLM's own output often opens with its own H1 (e.g. "# Marketing
+    # Promotion Kit"), which would just repeat the section label above it.
+    body = re.sub(r"^#\s+.+?\n+", "", body, count=1)
+    # Demote the LLM's own subheads (## Elevator Pitch, etc.) one level so
+    # they stay visually smaller than the ### section label above them.
+    body = re.sub(r"^##(?!#)", "####", body, flags=re.MULTILINE)
+    body = body.replace("\n", "  \n")
     print(f"{body}\n")
 ```

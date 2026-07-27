@@ -1,18 +1,69 @@
+/* Brand values per Smartivate_Brand_guidelines.pdf (v0.2) — logo/colour
+   section is marked authoritative; interface colours are explicitly flagged
+   as unapproved, so this deliberately does not use them. */
+:root {
+  --brand-indigo: #3B5EA5;
+  --brand-cyan: #4BC1ED;
+  --brand-text: #16232E;
+  --brand-text-secondary: #55636E;
+  --brand-border: #E1E8EE;
+  --brand-surface: #FFFFFF;
+}
+
 body {
-  font-family: 'DM Sans', system-ui, sans-serif;
-  color: #111118;
+  /* Wordmark face is unconfirmed in the brand guide; Poppins is its own
+     closest suggested match. */
+  font-family: 'Poppins', 'Century Gothic', 'Futura PT', system-ui, sans-serif;
+  color: var(--brand-text);
   max-width: 720px;
   margin: 0 auto;
-  padding: 2rem 1.5rem;
+  padding: 0 1.5rem 2rem;
 }
-h1 { color: #2F2FEB; font-weight: 700; letter-spacing: -0.02em; }
-h2 {
+
+.brand-header {
+  /* Full-colour lockup requires a white/very light surface (brand guide DO);
+     we only have that variant, not the white knockout the gradient needs, so
+     no gradient band behind the logo. */
+  margin: 0 0 2rem;
+  padding: 1.5rem 0 0;
+}
+
+.brand-header img {
+  /* Brand guide: mark is 1:1, container max-width 180px per branding-style.ts. */
+  max-width: 180px;
+  height: auto;
+  display: block;
+}
+
+h1 {
+  color: var(--brand-indigo);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* Section label per kit (e.g. "Marketing Kit") — smaller than the release
+   title above it, still brand indigo. */
+h3 {
+  color: var(--brand-indigo);
+  font-weight: 600;
+  font-size: 1.3rem;
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--brand-border);
+}
+
+/* The LLM's own subheads inside a kit's body (e.g. "Elevator Pitch"). */
+h4 {
   font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #72727A;
-  border-bottom: 1px solid #DDDDE8;
+  color: var(--brand-text-secondary);
+  border-bottom: 1px solid var(--brand-border);
   padding-bottom: 0.4rem;
-  margin-top: 2rem;
+  margin-top: 1.5rem;
+}
+
+strong {
+  color: var(--brand-indigo);
 }
