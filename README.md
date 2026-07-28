@@ -9,6 +9,8 @@ Start with [`agent md files/agents.md`](agent%20md%20files/agents.md) for conven
 and the repo map, and [`project_structure.md`](project_structure.md) for scope,
 stakeholders, and the WBS.
 
+![Feature Launch Kit — select screen](assets/AI%20Feature%20Launch%20Kit%20Creator.png)
+
 ## Run it
 
 **One-click (recommended):** double-click `Launch Web App_Windows.bat` (Windows) or
@@ -65,13 +67,15 @@ tests/
 output/                                    generated kit files (gitignored)
 assets/
   logo_smartivate.png                      UI + downloadable-kit logo
+  AI Feature Launch Kit Creator.png        app screenshot (used above)
   Day1_kanban.png, Day2_kanban.png         Kanban board screenshots (WBS 6.3)
-Smart_Home_Configurator_Communications_Pack.html   sample rendered output for the current release
-prompt.txt                                original agent bootstrap prompt used to scope this build
+  Smart_Home_Configurator_Communications_Pack.html   sample rendered output for the current release
+  prompt.txt                               original agent bootstrap prompt used to scope this build
 requirements.txt, .env.example             dependencies and config template
 ```
 
-## Imported from Confluence
+## Team
 
-Source: `feature-launch-kit.atlassian.net`, personal space. Files carrying that
-provenance note it in frontmatter.
+- Anand Narasipuram
+- Adam Valois
+- John Adams
