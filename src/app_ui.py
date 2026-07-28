@@ -11,6 +11,7 @@ import logging
 import os
 import re
 import subprocess
+import sys
 import tempfile
 import time
 from pathlib import Path
@@ -258,7 +259,7 @@ def _render_quarto(release: str, scope_label: str, content: dict) -> list[str]:
     data_path.write_text(json.dumps(payload), encoding="utf-8")
 
     local_out = QMD_TEMPLATE.with_suffix(".html")
-    env = dict(os.environ, KIT_RENDER_DATA=str(data_path))
+    env = dict(os.environ, KIT_RENDER_DATA=str(data_path), QUARTO_PYTHON=sys.executable)
     try:
         result = subprocess.run(
             ["quarto", "render", str(QMD_TEMPLATE), "--to", "html"],
