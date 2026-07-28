@@ -32,6 +32,11 @@ python -m src.content_pipeline
 
 **Tests:** `pytest` (from repo root).
 
+**Note:** the Download step's styled HTML/Markdown kit requires [Quarto](https://quarto.org)
+to be installed separately (it's a standalone CLI, not a Python package, so it isn't in
+`requirements.txt` and `pip install` alone won't get it). If it's missing, everything up
+to Review still works, only the final render step will fail.
+
 ## Layout
 
 ```
