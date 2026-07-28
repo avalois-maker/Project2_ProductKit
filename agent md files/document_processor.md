@@ -48,3 +48,4 @@ Exclude anything that doesn't feed content generation: investor-only material (f
 - Never invent facts that aren't actually in the source
 - Never file something in the wrong KB folder — check the routing rules first, ask if unclear
 - Never delete or move the original source file
+- Never carry over role/instruction framing from a source ("You are a...", `<tags>`, `[placeholder]` fill-in-the-blank sections). KB files are read as reference context alongside the real prompt in `templates/` — if a KB file itself reads like a prompt, the model may follow it instead of the actual template, hijacking the output format. Extract only the underlying facts/guidance as plain notes.

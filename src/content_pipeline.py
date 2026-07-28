@@ -146,7 +146,7 @@ def list_releases() -> list[str]:
     return [CURRENT_RELEASE]
 
 
-def generate_kit(feature_file: str, scope: str, temperature: float = 0.7) -> dict[str, str]:
+def generate_kit(feature_file: str, scope: str, temperature: float = 0.8) -> dict[str, str]:
     """Generate launch kit content for the current feature release.
 
     feature_file is accepted for forward-compatibility with a future

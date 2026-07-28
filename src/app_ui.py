@@ -369,7 +369,7 @@ with gr.Blocks(title="Feature Launch Kit") as demo:
     def on_generate_run(release, scope_label):
         time.sleep(0.6)
         content = _generate_or_raise(
-            release, scope_label, temperature=0.7,
+            release, scope_label, temperature=0.8,
             retry_msg="Generation failed — both LLM providers are unavailable. Try again shortly.",
         )
         return _status_html("Done", True, 100), content
